@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raíces Digitales - Talleres Abiertos</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <header>
+    <h1>Raíces Digitales</h1>
+    <p>Conectando comunidad a través del arte</p>
+  </header>
+
+  <main>
+    <section class="presentacion">
+      <img src="assets/arte.jpg" alt="Arte urbano comunitario">
+    </section>
+
+    <section class="talleres">
+      <h2>Talleres Abiertos</h2>
+      <div class="tarjetas">
+        <article>
+          <h3>Teatro Comunitario</h3>
+          <p>Explora la actuación como herramienta de expresión colectiva.</p>
+          <p><strong>Horario:</strong> Lunes y Miércoles 18:00 - 20:00</p>
+        </article>
+        <article>
+          <h3>Danza Urbana</h3>
+          <p>Movimiento, identidad y cuerpo al ritmo de la ciudad.</p>
+          <p><strong>Horario:</strong> Martes y Jueves 17:00 - 19:00</p>
+        </article>
+        <article>
+          <h3>Música Callejera</h3>
+          <p>Crea y comparte sonidos que nacen del barrio.</p>
+          <p><strong>Horario:</strong> Sábados 11:00 - 13:00</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="contacto">
+      <h2>Preinscripción a Talleres</h2>
+      <form id="formulario">
+        <label for="nombres">Nombres:</label>
+        <input type="text" id="nombres" required>
+
+        <label for="apellidos">Apellidos:</label>
+        <input type="text" id="apellidos" required>
+
+        <label for="rut">RUT:</label>
+        <input type="text" id="rut" placeholder="Ej: 12345678-9" required>
+
+        <label for="nacimiento">Fecha de Nacimiento:</label>
+        <input type="text" id="nacimiento" placeholder="dd/mm/aaaa" required>
+
+        <label for="taller">Taller de interés:</label>
+        <select id="taller" required>
+          <option value="">Selecciona uno</option>
+          <option>Teatro</option>
+          <option>Danza</option>
+          <option>Música</option>
+        </select>
+
+        <label for="correo">Correo electrónico:</label>
+        <input type="email" id="correo" required>
+
+        <label for="observaciones">Observaciones:</label>
+        <textarea id="observaciones"></textarea>
+
+        <button type="submit">Registrarse</button>
+      </form>
+
+      <div id="mensaje" style="margin-top: 1em; color: red;"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Redes sociales: @RaicesDigitales</p>
+    <p>Contacto: contacto@raicesdigitales.cl</p>
+  </footer>
+
+  <script>
+    function validarRUT(rut) {
+      rut = rut.replace(/\./g, '').toUpperCase();
+      if (!/^\d{7,8}-[0-9K]$/.test(rut)) return false;
+
+      const [numero, dv] = rut.split('-');
+      let suma = 0, multiplo = 2;
+
+      for (let i = numero.length - 1; i >= 0; i--) {
+        suma += parseInt(numero[i]) * multiplo;
+        multiplo = multiplo === 7 ? 2 : multiplo + 1;
+      }
+
+      const digitoEsperado = 11 - (suma % 11);
+      const dvCalculado = digitoEsperado === 11 ? '0' : digitoEsperado === 10 ? 'K' : digitoEsperado.toString();
+
+      return dv === dvCalculado;
+    }
+
+    function calcularEdad(fecha) {
+      const partes = fecha.split('/');
+      const dia = parseInt(partes[0]);
+      const mes = parseInt(partes[1]) - 1;
+      const anio = parseInt(partes[2]);
+      const hoy = new Date();
+      const cumple = new Date(anio, mes, dia);
+      let edad = hoy.getFullYear() - anio;
+
+      if (hoy.getMonth() < mes || (hoy.getMonth() === mes && hoy.getDate() < dia)) {
+        edad--;
+      }
+
+      return edad;
+    }
+
+    function validarCorreo(email) {
+      const regex = /^[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]+$/;
+      return regex.test(email);
+    }
+
+    document.getElementById("formulario").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const rut = document.getElementById("rut").value.trim();
+      const fecha = document.getElementById("nacimiento").value.trim();
+      const correo = document.getElementById("correo").value.trim();
+      const mensaje = document.getElementById("mensaje");
+      mensaje.style.color = "red";
+
+      if (!validarRUT(rut)) {
+        mensaje.textContent = "RUT inválido. Revisa el formato y dígito verificador.";
+        return;
+      }
+
+      if (!/^\d{2}\/\d{2}\/\d{4}$/.test(fecha)) {
+        mensaje.textContent = "La fecha debe tener el formato dd/mm/aaaa.";
+        return;
+      }
+
+      const [d, m, a] = fecha.split('/').map(Number);
+      if (d < 1 || d > 31 || m < 1 || m > 12 || a < 0 || a > 9999) {
+        mensaje.textContent = "Fecha de nacimiento fuera de rango.";
+        return;
+      }
+
+      const edad = calcularEdad(fecha);
+      if (edad < 14) {
+        mensaje.textContent = "Debes tener al menos 14 años para postular.";
+        return;
+      }
+
+      if (!validarCorreo(correo)) {
+        mensaje.textContent = "Correo electrónico inválido.";
+        return;
+      }
+
+      mensaje.style.color = "green";
+      mensaje.textContent = "Formulario enviado correctamente. ¡Gracias por postular!";
+    });
+  </script>
+
+</body>
+</html>
